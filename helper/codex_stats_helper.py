@@ -56,9 +56,12 @@ def parse_now(value: str) -> datetime:
     local_tz = datetime.now().astimezone().tzinfo or timezone.utc
     if not value:
         return datetime.now(local_tz)
-    parsed = parse_datetime(value, local_tz)
-    if parsed is None:
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
         raise SystemExit(f"Invalid --now value: {value}")
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=local_tz)
     return parsed
 
 
